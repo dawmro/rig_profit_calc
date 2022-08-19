@@ -11,7 +11,8 @@ from bs4 import BeautifulSoup
   
     
 def getProfitDaily(coin = 'ethereum', hashrate=328, power=650, electricityPrice=0.1):
-    hashrate = hashrate*1000000 # h/s   
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting API for "+coin+" ...")
+    hashrate = hashrate*10**6 # Mh/s   
     response = requests.get('https://www.coincalculators.io/api?name='+str(coin)+'&hashrate='+str(hashrate)+'&power='+str(power)+'&powercost='+str(electricityPrice), timeout=1)
     profitDaily = json.loads(response.text)['profitInDayUSD']
     print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] API for "+coin+" done! Value: "+str(profitDaily))
@@ -20,7 +21,7 @@ def getProfitDaily(coin = 'ethereum', hashrate=328, power=650, electricityPrice=
 
     
 def getPriceFromShop(link, name = "default_name"):
-    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting getPrice for "+name+" done!")
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting getPrice for "+name+" ...")
     price_int = 1000000
     try:
         r = requests.get(link, timeout = 3)
@@ -37,7 +38,7 @@ def getPriceFromShop(link, name = "default_name"):
 
 
 def getHashrateFromShop(link, name = "default_name"):
-    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting getHashrate for "+name+" done!")
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting getHashrate for "+name+" ...")
     hashrate = 1
     try:
         r = requests.get(link, timeout = 3)
@@ -84,6 +85,38 @@ def getHashrateFromShop(link, name = "default_name"):
     except:
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Can't get hashrate for "+name+", using default")
         return hashrate
+        
+        
+def getWattageFromShop(link, name = "default_name"):
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting getWattage for "+name+" ...")
+    wattage = 1000
+    try:
+        r = requests.get(link, timeout = 3)
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        p_tag = soup.find_all("p")
+        for i in p_tag:
+            
+            text = i.get_text()
+            
+            if "Pobór energii:" in text:
+
+                text = text.split("Pobór energii:")[1].strip()
+                    
+                text = text.split("W")[0].strip()
+                if "-" in text:
+                    text = text.split("-")
+                    wattage = int((int(text[0]) + int(text[1])) / 2)
+                
+                else:
+                    wattage = int(text)
+                    
+        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] getWattage for "+name+" done!")
+        return wattage
+        
+    except:
+        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Can't get wattage for "+name+", using default")
+        return wattage
 
 
 
@@ -177,7 +210,7 @@ if __name__ == "__main__":
     link_6xRX570_4gb_used = "https://shop.zet-tech.eu/pl/p/6x-RX-470-4GB-Koparka-kryptowalut/116"
     cDict['rigPricePLN_6xRX570_4gb_used'] = usePriceCache(link_6xRX570_4gb_used, cDict['rigName_6xRX570_4gb_used'], "_6xRX570_4gb_used")
     cDict['hashrate_6xRX570_4gb_used'] = getHashrateFromShop(link_6xRX570_4gb_used, cDict['rigName_6xRX570_4gb_used']) # Mh/s
-    cDict['power_6xRX570_4gb_used'] = 800
+    cDict['power_6xRX570_4gb_used'] = getWattageFromShop(link_6xRX570_4gb_used, cDict['rigName_6xRX570_4gb_used']) # W
     cDict['profitDailyPLN_6xRX570_4gb_used'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) - (cDict.get('power_6xRX570_4gb_used') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
     cDict['roi_6xRX570_4gb_used'] = int(cDict.get('rigPricePLN_6xRX570_4gb_used')/(cDict.get('profitDailyPLN_6xRX570_4gb_used')))
     if cDict['roi_6xRX570_4gb_used'] < 0:
@@ -188,7 +221,7 @@ if __name__ == "__main__":
     link_8xRX6600 = "https://shop.zet-tech.eu/pl/p/8x-RX-6600XT-Koparka-kryptowalut-NOWOSC/118"
     cDict['rigPricePLN_8xRX6600'] = usePriceCache(link_8xRX6600, cDict['rigName_8xRX6600'], "_8xRX6600")
     cDict['hashrate_8xRX6600'] = getHashrateFromShop(link_8xRX6600, cDict['rigName_8xRX6600']) # Mh/s
-    cDict['power_8xRX6600'] = 580
+    cDict['power_8xRX6600'] = getWattageFromShop(link_8xRX6600, cDict['rigName_8xRX6600']) # W
     cDict['profitDailyPLN_8xRX6600'] = round((profitPerMHsDaily_ETH * PLNperUSD * cDict.get('hashrate_8xRX6600')) - (cDict.get('power_8xRX6600') * 24 / 1000 * cDict.get('electricityPricePLN')), 2)
     cDict['roi_8xRX6600'] = int(cDict.get('rigPricePLN_8xRX6600')/(cDict.get('profitDailyPLN_8xRX6600')))
     if cDict['roi_8xRX6600'] < 0:
