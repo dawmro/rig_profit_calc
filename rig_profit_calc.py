@@ -3,7 +3,6 @@ import json
 import sqlite3
 import os
 import time
-import re
 
 from datetime import datetime
 from bs4 import BeautifulSoup
@@ -186,10 +185,61 @@ def useShopCache(link, rigModel, tableName):
         conn.close()
         
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Updating cache, using new values for "+str(rigModel))
+        
     else:
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Using cached values for "+str(rigModel))
+        
     return int(final_price), int(final_hashrate), int(final_wattage)
+    
+    
+    
 
+def useProfitCache(coin, hashrate, power, electricityPrice):
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting useProfitCache for "+str(coin)+" ...")
+    timestamp = 0
+    
+    db_path = "db/cacheFromProfit.db"
+    path = 'db'
+    createDirIfNotExist(path)
+    
+    if os.path.exists(db_path):
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute("""CREATE TABLE IF NOT EXISTS """+coin+""" (
+            timestamp TEXT,
+            profitability TEXT
+            )""")
+        c.execute("""SELECT timestamp, profitability FROM """+coin+""" ORDER BY timestamp DESC LIMIT 1""")
+        for row in c.fetchall():
+            timestamp = int(row[0])
+            profitDaily = float(row[1])
+            
+    timeNow = int(time.time())
+    if timestamp + 10 < timeNow:
+        profitDaily = getProfitDaily(coin, hashrate, power, electricityPrice)
+        
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute("""CREATE TABLE IF NOT EXISTS """+coin+""" (
+            timestamp TEXT,
+            profitability TEXT
+            )""")     
+            
+        c.execute("""INSERT INTO """+coin+""" VALUES(
+            ?,  ?)""", (timeNow, profitDaily))
+            
+        c.execute("""Delete from """+coin+""" where timestamp <> (Select max (timestamp) from """+coin+""")""")
+        
+        conn.commit()
+        c.close()
+        conn.close()        
+
+        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Updating ProfitCache, using new values for "+str(coin))
+        
+    else:
+        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Using cached values for "+str(coin))
+        
+    return profitDaily
  
         
     
@@ -205,19 +255,18 @@ if __name__ == "__main__":
     profitPerMHsDaily_ETC = 0.02185
     profitPerMHsDaily_RVN = 0.05123
 
-
     try:
-        profitPerMHsDaily_ETH = getProfitDaily('ethereum', 1, 0, 0)
-    except:
+        profitPerMHsDaily_ETH = useProfitCache('ethereum', 1, 0, 0)
+    except:    
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Can't fetch profits for ETH, using: " + str(profitPerMHsDaily_ETH))
 
     try:
-        profitPerMHsDaily_ETC = getProfitDaily('ethereumclassic', 1, 0, 0)
+        profitPerMHsDaily_ETC = useProfitCache('ethereumclassic', 1, 0, 0)
     except:
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Can't fetch profits for ETC, using: " + str(profitPerMHsDaily_ETC))
     
     try:
-        profitPerMHsDaily_RVN = getProfitDaily('ravencoin', 1, 0, 0)
+        profitPerMHsDaily_RVN = useProfitCache('ravencoin', 1, 0, 0)
     except:
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Can't fetch profits for RVN, using: " + str(profitPerMHsDaily_RVN))
         
