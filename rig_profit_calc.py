@@ -134,14 +134,13 @@ def createDirIfNotExist(path):
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Creating cache directory")
         os.makedirs(path)
  
- 
-        
-def usePriceCache(link, rigModel, tableName):
+
+
+def useShopCache(link, rigModel, tableName):
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting useShopCache for "+str(rigModel)+" ...")
     timestamp = 0
-    final_price = 999999
     
-    db_path = "db/cachePriceFromShop.db"
-    
+    db_path = "db/cacheFromShop.db"
     path = 'db'
     createDirIfNotExist(path)
     
@@ -150,34 +149,48 @@ def usePriceCache(link, rigModel, tableName):
         c = conn.cursor()
         c.execute("""CREATE TABLE IF NOT EXISTS """+tableName+""" (
             timestamp TEXT,
-            price TEXT
+            price TEXT,
+            hashrate TEXT,
+            wattage TEXT
             )""")
-        c.execute("""SELECT timestamp, price FROM """+tableName+""" ORDER BY timestamp DESC LIMIT 1""")
+        c.execute("""SELECT timestamp, price, hashrate, wattage FROM """+tableName+""" ORDER BY timestamp DESC LIMIT 1""")
         for row in c.fetchall():
             timestamp = int(row[0])
             final_price = int(row[1])
-            
-    timeNow = int(time.time()) 
-    if timestamp + 6 < timeNow:
-        final_price = getPriceFromSoup(link, rigModel)
+            final_hashrate = int(row[2])
+            final_wattage = int(row[3])
+    
+    timeNow = int(time.time())
+    if timestamp + 10 < timeNow:
+        soup = getSoup(link, rigModel)
+        final_price = getPriceFromSoup(soup, rigModel)
+        final_hashrate = getHashrateFromSoup(soup, rigModel)
+        final_wattage = getWattageFromSoup(soup, rigModel)
+        
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
         c.execute("""CREATE TABLE IF NOT EXISTS """+tableName+""" (
             timestamp TEXT,
-            price TEXT
+            price TEXT,
+            hashrate TEXT,
+            wattage TEXT
             )""")
+            
         c.execute("""INSERT INTO """+tableName+""" VALUES(
-            ?, ?)""", (timeNow, final_price))
+            ?, ?, ?, ?)""", (timeNow, final_price, final_hashrate, final_wattage))
+            
         c.execute("""Delete from """+tableName+""" where timestamp <> (Select max (timestamp) from """+tableName+""")""")
+        
         conn.commit()
         c.close()
         conn.close()
-        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Updating cache for "+str(rigModel))
-    else:
-        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Using cache for "+str(rigModel))
-
-    return int(final_price)
         
+        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Updating cache, using new values for "+str(rigModel))
+    else:
+        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Using cached values for "+str(rigModel))
+    return int(final_price), int(final_hashrate), int(final_wattage)
+
+ 
         
     
 # TODO:
@@ -216,10 +229,7 @@ if __name__ == "__main__":
 
     cDict['rigName_6xRX570_4gb_used'] = "6x RX570 4GB Used"
     link_6xRX570_4gb_used = "https://shop.zet-tech.eu/pl/p/6x-RX-470-4GB-Koparka-kryptowalut/116"
-    soup_6xRX570_4gb_used = getSoup(link_6xRX570_4gb_used, cDict['rigName_6xRX570_4gb_used'])
-    cDict['rigPricePLN_6xRX570_4gb_used'] = usePriceCache(soup_6xRX570_4gb_used, cDict['rigName_6xRX570_4gb_used'], "_6xRX570_4gb_used")
-    cDict['hashrate_6xRX570_4gb_used'] = getHashrateFromSoup(soup_6xRX570_4gb_used, cDict['rigName_6xRX570_4gb_used']) # Mh/s
-    cDict['power_6xRX570_4gb_used'] = getWattageFromSoup(soup_6xRX570_4gb_used, cDict['rigName_6xRX570_4gb_used']) # W
+    cDict['rigPricePLN_6xRX570_4gb_used'], cDict['hashrate_6xRX570_4gb_used'], cDict['power_6xRX570_4gb_used']  = useShopCache(link_6xRX570_4gb_used, cDict['rigName_6xRX570_4gb_used'], "_6xRX570_4gb_used")
     cDict['profitDailyPLN_6xRX570_4gb_used'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) - (cDict.get('power_6xRX570_4gb_used') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
     cDict['roi_6xRX570_4gb_used'] = int(cDict.get('rigPricePLN_6xRX570_4gb_used')/(cDict.get('profitDailyPLN_6xRX570_4gb_used')))
     if cDict['roi_6xRX570_4gb_used'] < 0:
@@ -228,10 +238,7 @@ if __name__ == "__main__":
     
     cDict['rigName_8xRX6600'] = "8x RX6600XT"
     link_8xRX6600 = "https://shop.zet-tech.eu/pl/p/8x-RX-6600XT-Koparka-kryptowalut-NOWOSC/118"
-    soup_8xRX6600 = getSoup(link_8xRX6600, cDict['rigName_8xRX6600'])
-    cDict['rigPricePLN_8xRX6600'] = usePriceCache(soup_8xRX6600, cDict['rigName_8xRX6600'], "_8xRX6600")
-    cDict['hashrate_8xRX6600'] = getHashrateFromSoup(soup_8xRX6600, cDict['rigName_8xRX6600']) # Mh/s
-    cDict['power_8xRX6600'] = getWattageFromSoup(soup_8xRX6600, cDict['rigName_8xRX6600']) # W
+    cDict['rigPricePLN_8xRX6600'], cDict['hashrate_8xRX6600'], cDict['power_8xRX6600'] = useShopCache(link_8xRX6600, cDict['rigName_8xRX6600'], "_8xRX6600")
     cDict['profitDailyPLN_8xRX6600'] = round((profitPerMHsDaily_ETH * PLNperUSD * cDict.get('hashrate_8xRX6600')) - (cDict.get('power_8xRX6600') * 24 / 1000 * cDict.get('electricityPricePLN')), 2)
     cDict['roi_8xRX6600'] = int(cDict.get('rigPricePLN_8xRX6600')/(cDict.get('profitDailyPLN_8xRX6600')))
     if cDict['roi_8xRX6600'] < 0:
