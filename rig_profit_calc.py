@@ -3,9 +3,21 @@ import json
 import sqlite3
 import os
 import time
+import ast
 
 from datetime import datetime
 from bs4 import BeautifulSoup
+
+
+
+def getUsdPln():
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting USDPLN  ...")  
+    response = requests.get('http://api.nbp.pl/api/exchangerates/rates/c/usd/today/', timeout = 3)
+    usdpln = str(json.loads(response.text)['rates']).replace("[", "").replace("]", "")
+    usdpln = ast.literal_eval(usdpln)['ask']
+    
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] USDPLN done! Value: "+str(usdpln))
+    return usdpln
 
   
     
@@ -160,7 +172,7 @@ def useShopCache(link, rigModel, tableName):
             final_wattage = int(row[3])
     
     timeNow = int(time.time())
-    if timestamp + 10 < timeNow:
+    if timestamp + 60 < timeNow:
         soup = getSoup(link, rigModel)
         final_price = getPriceFromSoup(soup, rigModel)
         final_hashrate = getHashrateFromSoup(soup, rigModel)
@@ -215,7 +227,7 @@ def useProfitCache(coin, hashrate, power, electricityPrice):
             profitDaily = float(row[1])
             
     timeNow = int(time.time())
-    if timestamp + 10 < timeNow:
+    if timestamp + 60 < timeNow:
         profitDaily = getProfitDaily(coin, hashrate, power, electricityPrice)
         
         conn = sqlite3.connect(db_path)
@@ -254,6 +266,12 @@ if __name__ == "__main__":
     profitPerMHsDaily_ETH = 0.02721
     profitPerMHsDaily_ETC = 0.02185
     profitPerMHsDaily_RVN = 0.05123
+
+
+    try:
+        PLNperUSD = getUsdPln()
+    except:
+        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Can't fetch USDPLN, using: " + str(PLNperUSD))
 
     try:
         profitPerMHsDaily_ETH = useProfitCache('ethereum', 1, 0, 0)
