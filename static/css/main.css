@@ -1,0 +1,141 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #ffffff;
+}
+
+ /* unvisited link */
+      a:link {
+        color: #ffffff;
+      }
+      /* visited link */
+      a:visited {
+        color: #ffffff;
+      }
+      /* mouse over link */
+      a:hover {
+        color: #ffffaa;
+      }
+      /* selected link */
+      a:active {
+        color: #ffffaa;
+      }
+
+/*
+* Formatting the header area
+*/
+header {
+  background-color: #4CAF50; /* Green */
+  height: 35px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+header h1.logo {
+  margin: 0;
+  font-size: 1.7em;
+  color: #fff;
+/*text-transform: uppercase;*/
+  float: left;
+}
+
+/*
+* Centering the body content
+*/
+.container {
+  width: 1440px;
+  margin: 0 auto;
+}
+
+div.index {
+  vertical-align: middle;
+  padding: 35px 25px 35px 25px;
+  background-color: #4CAF50; /* Green */
+  -webkit-border-radius: 6px;
+     -moz-border-radius: 6px;
+          border-radius: 6px;
+}
+
+
+h2 {
+  font-size: 3em;
+  margin-top: 40px;
+  text-align: center;
+  letter-spacing: -2px;
+}
+
+h3 {
+  font-size: 1.7em;
+  font-weight: 100;
+  margin-top: 30px;
+  text-align: center;
+  letter-spacing: -1px;
+  color: #fff;
+}
+
+
+
+table, th, td {
+  border-collapse: collapse;
+  border-bottom: 1px solid #fff;
+  padding: 5px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.button {
+  position: relative;
+  font-weight: bold;
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 4px 8px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 2px 2px;
+  transition-duration: 0.4s;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.button:after {
+  content: "";
+  background: #f1f1f1;
+  display: block;
+  position: absolute;
+  padding-top: 300%;
+  padding-left: 350%;
+  margin-left: -20px !important;
+  margin-top: -120%;
+  opacity: 0;
+  transition: all 0.8s
+}
+
+.button:active:after {
+  padding: 0;
+  margin: 0;
+  opacity: 1;
+  transition: 0.0s
+}
+
+
+.navigation {
+  background-color: white; 
+  color: black; 
+  border: 2px solid #008CBA; /* Blue */
+  width: 100px
+}
+
+.navigation:hover {
+  background-color: #008CBA; /* Blue */
+  color: white;
+}
+
+
+
+
+
+

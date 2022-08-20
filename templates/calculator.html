@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Calculator
+{% endblock title %}
+
+
+{% block content %}
+
+
+<div class="index">
+
+
+<form action="" method="post">
+<table >
+	<tr>
+		<th>
+			<p>Electricity price [gr/kWh]:
+			<input type="number" name="electricityPricePLN_gr" min="0" max="99999" required/></p>
+		</th>
+		<th>
+			<input class="button navigation" type="submit" value="Go!"/>
+		</th>
+	</tr>
+</table>
+</form>
+
+<br>
+<br>
+<br>
+
+<h3> GPU rigs </h3>
+
+
+<table id="content">
+<tr>
+	<th>Model</th>	
+	<th>Price [zl]</th>
+	<th>Hashrate ETH [Mh/s] </th>
+	<th>Power [W]</th>
+	<th>Electricity price [gr/kWh]</th>
+	<th>Profit per day [zl] </th>
+	<th>Days to break-even</th>	
+</tr>
+
+<tr>
+	<th><a href={{ cDict["link_6xRX570_4gb_used"] }} target="_blank">{{ cDict["rigName_6xRX570_4gb_used"] }}</a></th>
+	<th>{{ cDict["rigPricePLN_6xRX570_4gb_used"] }}</th>
+	<th>{{ cDict["hashrate_6xRX570_4gb_used"] }} *mining ETC</th>
+	<th>{{ cDict["power_6xRX570_4gb_used"] }}</th>
+	<th>{{ cDict["electricityPricePLN_gr"] }}</th>
+	<th>{{ cDict["profitDailyPLN_6xRX570_4gb_used"] }}</th>
+	<th>{{ cDict["roi_6xRX570_4gb_used"] }}</th>
+</tr>
+
+<tr>
+	<th><a href={{ cDict["link_8xRX6600"] }} target="_blank">{{ cDict["rigName_8xRX6600"] }}</a></th>
+	<th>{{ cDict["rigPricePLN_8xRX6600"] }}</th>
+	<th>{{ cDict["hashrate_8xRX6600"] }}</th>
+	<th>{{ cDict["power_8xRX6600"] }}</th>
+	<th>{{ cDict["electricityPricePLN_gr"] }}</th>
+	<th>{{ cDict["profitDailyPLN_8xRX6600"] }}</th>
+	<th>{{ cDict["roi_8xRX6600"] }}</th>
+</tr>
+
+
+</div>
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

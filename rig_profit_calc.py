@@ -1,3 +1,5 @@
+from flask import Flask, render_template, request
+
 import requests
 import json
 import sqlite3
@@ -9,10 +11,17 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 
 
+caching_time = 60
+
+app = Flask(__name__)
+
+
+
 
 def getUsdPln():
     print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting USDPLN  ...")  
     response = requests.get('http://api.nbp.pl/api/exchangerates/rates/c/usd/today/', timeout = 3)
+    print(response.text)
     usdpln = str(json.loads(response.text)['rates']).replace("[", "").replace("]", "")
     usdpln = ast.literal_eval(usdpln)['ask']
     
@@ -172,7 +181,7 @@ def useShopCache(link, rigModel, tableName):
             final_wattage = int(row[3])
     
     timeNow = int(time.time())
-    if timestamp + 60 < timeNow:
+    if timestamp + caching_time < timeNow:
         soup = getSoup(link, rigModel)
         final_price = getPriceFromSoup(soup, rigModel)
         final_hashrate = getHashrateFromSoup(soup, rigModel)
@@ -227,7 +236,7 @@ def useProfitCache(coin, hashrate, power, electricityPrice):
             profitDaily = float(row[1])
             
     timeNow = int(time.time())
-    if timestamp + 60 < timeNow:
+    if timestamp + caching_time < timeNow:
         profitDaily = getProfitDaily(coin, hashrate, power, electricityPrice)
         
         conn = sqlite3.connect(db_path)
@@ -253,16 +262,14 @@ def useProfitCache(coin, hashrate, power, electricityPrice):
         
     return profitDaily
  
-        
     
-# TODO:
-# http://api.nbp.pl/api/exchangerates/rates/c/usd/today/
+    
 
-if __name__ == "__main__":
+def doCalculationsForElectricityPrice(electricityPricePLN_gr):
+
     
     # defaults
-    electricityPricePLN_gr = 80
-    PLNperUSD = 4.5
+    PLNperUSD = 4.7
     profitPerMHsDaily_ETH = 0.02721
     profitPerMHsDaily_ETC = 0.02185
     profitPerMHsDaily_RVN = 0.05123
@@ -296,6 +303,7 @@ if __name__ == "__main__":
 
     cDict['rigName_6xRX570_4gb_used'] = "6x RX570 4GB Used"
     link_6xRX570_4gb_used = "https://shop.zet-tech.eu/pl/p/6x-RX-470-4GB-Koparka-kryptowalut/116"
+    cDict['link_6xRX570_4gb_used'] = link_6xRX570_4gb_used
     cDict['rigPricePLN_6xRX570_4gb_used'], cDict['hashrate_6xRX570_4gb_used'], cDict['power_6xRX570_4gb_used']  = useShopCache(link_6xRX570_4gb_used, cDict['rigName_6xRX570_4gb_used'], "_6xRX570_4gb_used")
     cDict['profitDailyPLN_6xRX570_4gb_used'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) - (cDict.get('power_6xRX570_4gb_used') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
     cDict['roi_6xRX570_4gb_used'] = int(cDict.get('rigPricePLN_6xRX570_4gb_used')/(cDict.get('profitDailyPLN_6xRX570_4gb_used')))
@@ -305,19 +313,43 @@ if __name__ == "__main__":
     
     cDict['rigName_8xRX6600'] = "8x RX6600XT"
     link_8xRX6600 = "https://shop.zet-tech.eu/pl/p/8x-RX-6600XT-Koparka-kryptowalut-NOWOSC/118"
+    cDict['link_8xRX6600'] = link_8xRX6600
     cDict['rigPricePLN_8xRX6600'], cDict['hashrate_8xRX6600'], cDict['power_8xRX6600'] = useShopCache(link_8xRX6600, cDict['rigName_8xRX6600'], "_8xRX6600")
     cDict['profitDailyPLN_8xRX6600'] = round((profitPerMHsDaily_ETH * PLNperUSD * cDict.get('hashrate_8xRX6600')) - (cDict.get('power_8xRX6600') * 24 / 1000 * cDict.get('electricityPricePLN')), 2)
     cDict['roi_8xRX6600'] = int(cDict.get('rigPricePLN_8xRX6600')/(cDict.get('profitDailyPLN_8xRX6600')))
     if cDict['roi_8xRX6600'] < 0:
         cDict['roi_8xRX6600'] = "Never :("  
         
+
+    return cDict
     
     
-    
-    print(cDict)
 
     
+@app.route('/', defaults={'electricityPricePLN_gr': 0}, methods=['GET', 'POST'])
+@app.route('/<int:electricityPricePLN_gr>', methods=['GET', 'POST'])
+def profitCalculator(electricityPricePLN_gr):
+	print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Calculator Started!")
+	
+	if request.method == 'POST':
+		print("request.method == POST!")
+		electricityPricePLN_gr = request.form['electricityPricePLN_gr']
+		cDict = doCalculationsForElectricityPrice(electricityPricePLN_gr)
+        
+		print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Calculator Done!")
+		return render_template('calculator.html', electricityPricePLN_gr=electricityPricePLN_gr, cDict=cDict)
 
+		
+	else:
+		print("request.method == GET!")
+		cDict = doCalculationsForElectricityPrice(electricityPricePLN_gr)
+        
+		print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Calculator Done!")	
+		return render_template('calculator.html', electricityPricePLN_gr=electricityPricePLN_gr, cDict=cDict)
+
+
+if __name__ == '__main__':
+    app.run(debug = False)
         
         
         
