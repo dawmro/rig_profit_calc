@@ -56,59 +56,76 @@ def getSoup(link, name = "default_name"):
         return soup
 
     
-def getPriceFromSoup(soup, name = "default_name"):
+def getPriceFromSoup(soup, name = "default_name", vendor = "ZET"):
     print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting getPrice for "+name+" ...")
     price_int = 1000000
+    
     try:
-        price = soup.find('em', {'class': 'main-price'})
-        price_int = int(''.join(price.text.split())[:-5].upper())     
+        if vendor == "ZET":
+            price = soup.find('em', {'class': 'main-price'})
+            price_int = int(''.join(price.text.split())[:-5].upper()) 
+            
+        elif vendor == "OBM":
+            price = soup.find(class_ = 'price').select_one("bdi").text
+            price_int = int(price.split(",")[0].replace(" ", ""))
+            
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] getPrice for "+name+" done!")
-        
         return price_int
+        
     except:
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Can't get price for "+name+", using default")
         return price_int
 
 
 
-def getHashrateFromSoup(soup, name = "default_name"):
+def getHashrateFromSoup(soup, name = "default_name", vendor = "ZET"):
     print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting getHashrate for "+name+" ...")
     hashrate = 1
     try:
-        p_tag = soup.find_all("p")
-        for i in p_tag:
-            
-            text = i.get_text()
-            
-            if "Moc obliczeniowa:" in text:
-
-                text = text.split("Moc obliczeniowa:")[1].strip()
-                text = text.split("(")[0].strip()
-                if "Ph/s" in text:
-                    multiplier = 10**15
-                    split_mul = "Ph/s"
-                elif "Th/s" in text:
-                    multiplier = 10**12
-                    split_mul = "Th/s"
-                elif "Gh/s" in text:
-                    multiplier = 10**9
-                    split_mul = "Gh/s"
-                elif "Mh/s" in text:
-                    multiplier = 10**6
-                    split_mul = "Mh/s"
-                elif "kh/s" in text:
-                    multiplier = 10**3
-                    split_mul = "kh/s"
-                elif "h/s" in text:
-                    multiplier = 10**0
-                    split_mul = "h/s"
-                    
-                text = text.split(split_mul)[0].strip()
-                if "-" in text:
-                    text = text.split("-")
-                    hashrate = int((int(text[0]) + int(text[1])) / 2)
+        if vendor == "ZET":
+            p_tag = soup.find_all("p")
+            for i in p_tag:
                 
-                else:
+                text = i.get_text()
+                
+                if "Moc obliczeniowa:" in text:
+
+                    text = text.split("Moc obliczeniowa:")[1].strip()
+                    text = text.split("(")[0].strip()
+                    if "Ph/s" in text:
+                        multiplier = 10**15
+                        split_mul = "Ph/s"
+                    elif "Th/s" in text:
+                        multiplier = 10**12
+                        split_mul = "Th/s"
+                    elif "Gh/s" in text:
+                        multiplier = 10**9
+                        split_mul = "Gh/s"
+                    elif "Mh/s" in text:
+                        multiplier = 10**6
+                        split_mul = "Mh/s"
+                    elif "kh/s" in text:
+                        multiplier = 10**3
+                        split_mul = "kh/s"
+                    elif "h/s" in text:
+                        multiplier = 10**0
+                        split_mul = "h/s"
+                        
+                    text = text.split(split_mul)[0].strip()
+                    if "-" in text:
+                        text = text.split("-")
+                        hashrate = int((int(text[0]) + int(text[1])) / 2)
+                    
+                    else:
+                        hashrate = int(text)
+                        
+        elif vendor == "OBM": 
+            div_tag = soup.find_all("div", class_ = "item item-6")
+            for i in div_tag:
+                text = i.get_text()
+
+                if "Mining GPU ETH/ETC =" in text:
+                    text = text.split("Mining GPU ETH/ETC =")[1].strip().split("MH")[0]
                     hashrate = int(text)
                     
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] getHashrate for "+name+" done!")
@@ -119,25 +136,34 @@ def getHashrateFromSoup(soup, name = "default_name"):
         return hashrate
         
         
-def getWattageFromSoup(soup, name = "default_name"):
+def getWattageFromSoup(soup, name = "default_name", vendor = "ZET"):
     print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting getWattage for "+name+" ...")
     wattage = 1000000
     try:
-        p_tag = soup.find_all("p")
-        for i in p_tag:
-            
-            text = i.get_text()
-            
-            if "Pobór energii:" in text:
-
-                text = text.split("Pobór energii:")[1].strip()
-                    
-                text = text.split("W")[0].strip()
-                if "-" in text:
-                    text = text.split("-")
-                    wattage = int((int(text[0]) + int(text[1])) / 2)
+        if vendor == "ZET":
+            p_tag = soup.find_all("p")
+            for i in p_tag:
                 
-                else:
+                text = i.get_text()
+                
+                if "Pobór energii:" in text:
+
+                    text = text.split("Pobór energii:")[1].strip()
+                        
+                    text = text.split("W")[0].strip()
+                    if "-" in text:
+                        text = text.split("-")
+                        wattage = int((int(text[0]) + int(text[1])) / 2)
+                    
+                    else:
+                        wattage = int(text)
+        elif vendor == "OBM": 
+            div_tag = soup.find_all("div", class_ = "item item-6")
+            for i in div_tag:
+                text = i.get_text()
+
+                if "Realny pobór pradu:" in text:
+                    text = text.split("Realny pobór pradu:")[1].strip().split("W")[0]
                     wattage = int(text)
                     
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] getWattage for "+name+" done!")
@@ -157,7 +183,7 @@ def createDirIfNotExist(path):
  
 
 
-def useShopCache(link, rigModel, tableName):
+def useShopCache(link, rigModel, tableName, vendor = "ZET"):
     print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting useShopCache for "+str(rigModel)+" ...")
     timestamp = 0
     
@@ -184,9 +210,9 @@ def useShopCache(link, rigModel, tableName):
     timeNow = int(time.time())
     if timestamp + caching_time < timeNow:
         soup = getSoup(link, rigModel)
-        final_price = getPriceFromSoup(soup, rigModel)
-        final_hashrate = getHashrateFromSoup(soup, rigModel)
-        final_wattage = getWattageFromSoup(soup, rigModel)
+        final_price = getPriceFromSoup(soup, rigModel, vendor)
+        final_hashrate = getHashrateFromSoup(soup, rigModel, vendor)
+        final_wattage = getWattageFromSoup(soup, rigModel, vendor)
         
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
@@ -480,7 +506,19 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['roi_540xRTX3070'] = int(cDict.get('rigPricePLN_540xRTX3070')/(cDict.get('profitDailyPLN_540xRTX3070')))
     if cDict['roi_540xRTX3070'] < 0:
         cDict['roi_540xRTX3070'] = "Never :("
-        
+    
+    
+    # ---------------------------- OBM -----------------------------
+    
+
+    cDict['rigName_obm_10xRTX3070'] = "10x RTX3070"
+    link_obm_10xRTX3070 = "https://onlybestminers.com/pl_pl/produkt/gpu-obm10xrtx3070/"
+    cDict['link_obm_10xRTX3070'] = link_obm_10xRTX3070
+    cDict['rigPricePLN_obm_10xRTX3070'], cDict['hashrate_obm_10xRTX3070'], cDict['power_obm_10xRTX3070'] = useShopCache(link_obm_10xRTX3070, cDict['rigName_obm_10xRTX3070'], "_obm_10xRTX3070", "OBM")
+    cDict['profitDailyPLN_obm_10xRTX3070'] = round((profitPerMHsDaily_ETH * PLNperUSD * cDict.get('hashrate_obm_10xRTX3070')) - (cDict.get('power_obm_10xRTX3070') * 24 / 1000 * cDict.get('electricityPricePLN')), 2)
+    cDict['roi_obm_10xRTX3070'] = int(cDict.get('rigPricePLN_obm_10xRTX3070')/(cDict.get('profitDailyPLN_obm_10xRTX3070')))
+    if cDict['roi_obm_10xRTX3070'] < 0:
+        cDict['roi_obm_10xRTX3070'] = "Never :("    
 
     return cDict
     
