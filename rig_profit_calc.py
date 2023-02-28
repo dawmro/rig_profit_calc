@@ -382,7 +382,8 @@ def readAndUpdateCache(names, urls, tableNames, vendors):
         
     
     return final_prices, final_hashrates, final_wattages
-    
+ 
+ 
    
 def doCalculationsForElectricityPrice(electricityPricePLN_gr):
 
@@ -466,24 +467,36 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
 
     cDict['rigPricePLN_6xRX570_4gb_used'] = final_prices.pop(0)
     cDict['hashrate_6xRX570_4gb_used'] = final_hashrates.pop(0)
-    cDict['power_6xRX570_4gb_used'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_6xRX570_4gb_used'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) + (profitPerMHsDaily_KAS * PLNperUSD * cDict.get('kas_hashrate_6xRX570_4gb_used')) - (cDict.get('power_6xRX570_4gb_used') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
+    cDict['power_6xRX570_4gb_used'] = int(final_wattages.pop(0) * 1.25)
+    cDict['profitDailyPLN_6xRX570_4gb_used'] = round(
+        (profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) 
+        + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) 
+        + (profitPerMHsDaily_KAS * PLNperUSD * cDict.get('kas_hashrate_6xRX570_4gb_used')) 
+        - (cDict.get('power_6xRX570_4gb_used') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
     cDict['roi_6xRX570_4gb_used'] = int(cDict.get('rigPricePLN_6xRX570_4gb_used')/(cDict.get('profitDailyPLN_6xRX570_4gb_used')))
     if cDict['roi_6xRX570_4gb_used'] < 0:
         cDict['roi_6xRX570_4gb_used'] = "Never :("
         
     cDict['rigPricePLN_12xRX6600_octo'] = final_prices.pop(0)
     cDict['hashrate_12xRX6600_octo'] = final_hashrates.pop(0)
-    cDict['power_12xRX6600_octo'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_12xRX6600_octo'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_12xRX6600_octo')) + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_12xRX6600_octo')) + (profitPerMHsDaily_KAS * PLNperUSD * cDict.get('kas_hashrate_12xRX6600_octo')) - (cDict.get('power_12xRX6600_octo') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
+    cDict['power_12xRX6600_octo'] = int(final_wattages.pop(0) * 1.25)
+    cDict['profitDailyPLN_12xRX6600_octo'] = round(
+        (profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_12xRX6600_octo')) 
+        + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_12xRX6600_octo')) 
+        + (profitPerMHsDaily_KAS * PLNperUSD * cDict.get('kas_hashrate_12xRX6600_octo')) 
+        - (cDict.get('power_12xRX6600_octo') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
     cDict['roi_12xRX6600_octo'] = int(cDict.get('rigPricePLN_12xRX6600_octo')/(cDict.get('profitDailyPLN_12xRX6600_octo')))
     if cDict['roi_12xRX6600_octo'] < 0:
         cDict['roi_12xRX6600_octo'] = "Never :("
         
     cDict['rigPricePLN_obm_10xRTX3070'] = final_prices.pop(0)
     cDict['hashrate_obm_10xRTX3070'] = final_hashrates.pop(0)
-    cDict['power_obm_10xRTX3070'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_obm_10xRTX3070'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_obm_10xRTX3070')) + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_obm_10xRTX3070')) + (profitPerMHsDaily_KAS * PLNperUSD * cDict.get('kas_hashrate_obm_10xRTX3070')) - (cDict.get('power_obm_10xRTX3070') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
+    cDict['power_obm_10xRTX3070'] = int(final_wattages.pop(0) * 1.25)
+    cDict['profitDailyPLN_obm_10xRTX3070'] = round(
+        (profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_obm_10xRTX3070')) 
+        + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_obm_10xRTX3070')) 
+        + (profitPerMHsDaily_KAS * PLNperUSD * cDict.get('kas_hashrate_obm_10xRTX3070'))
+        - (cDict.get('power_obm_10xRTX3070') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
     cDict['roi_obm_10xRTX3070'] = int(cDict.get('rigPricePLN_obm_10xRTX3070')/(cDict.get('profitDailyPLN_obm_10xRTX3070')))
     if cDict['roi_obm_10xRTX3070'] < 0:
         cDict['roi_obm_10xRTX3070'] = "Never :("
