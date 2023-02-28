@@ -392,6 +392,7 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     PLNperUSD = 4.5
     profitPerMHsDaily_ETC = 0.00279
     profitPerMHsDaily_ZIL = 0.00070
+    profitPerMHsDaily_KAS = 0.00062
     #profitPerMHsDaily_RVN = 0.05123
 
 
@@ -406,6 +407,12 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
         profitPerMHsDaily_ETC = useProfitCache('162', 1, 0, 0) 
     except:
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Can't fetch profits for ETC, using: " + str(profitPerMHsDaily_ETC))
+        
+    try:
+        # kaspa
+        profitPerMHsDaily_KAS = useProfitCache('352', 1, 0, 0) 
+    except:
+        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Can't fetch profits for KAS, using: " + str(profitPerMHsDaily_KAS))
         
     
     '''
@@ -429,18 +436,21 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     link_6xRX570_4gb_used = "https://shop.zet-tech.eu/pl/p/6x-RX-570-4GB-Koparka-kryptowalut/155"
     urls.append(link_6xRX570_4gb_used)
     cDict['link_6xRX570_4gb_used'] = link_6xRX570_4gb_used
+    cDict['kas_hashrate_6xRX570_4gb_used'] = 600
     
     cDict['rigName_12xRX6600_octo'] = "ZET OCTOMINER 12x RX6600XT"
     names.append(cDict['rigName_12xRX6600_octo'])
     link_12xRX6600_octo = "https://shop.zet-tech.eu/pl/p/OCTOMINER-12x-RX6600/146"
     urls.append(link_12xRX6600_octo)
     cDict['link_12xRX6600_octo'] = link_12xRX6600_octo
+    cDict['kas_hashrate_12xRX6600_octo'] = 1440
     
     cDict['rigName_obm_10xRTX3070'] = "OBM 10x RTX3070"
     names.append(cDict['rigName_obm_10xRTX3070'])
     link_obm_10xRTX3070 = "https://onlybestminers.com/pl_pl/produkt/gpu-obm10xrtx3070/"
     urls.append(link_obm_10xRTX3070)
     cDict['link_obm_10xRTX3070'] = link_obm_10xRTX3070
+    cDict['kas_hashrate_obm_10xRTX3070'] = 3200
     
    
     
@@ -457,7 +467,7 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['rigPricePLN_6xRX570_4gb_used'] = final_prices.pop(0)
     cDict['hashrate_6xRX570_4gb_used'] = final_hashrates.pop(0)
     cDict['power_6xRX570_4gb_used'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_6xRX570_4gb_used'] = round(((profitPerMHsDaily_ETC + profitPerMHsDaily_ZIL) * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) - (cDict.get('power_6xRX570_4gb_used') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
+    cDict['profitDailyPLN_6xRX570_4gb_used'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) + (profitPerMHsDaily_KAS * PLNperUSD * cDict.get('kas_hashrate_6xRX570_4gb_used')) - (cDict.get('power_6xRX570_4gb_used') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
     cDict['roi_6xRX570_4gb_used'] = int(cDict.get('rigPricePLN_6xRX570_4gb_used')/(cDict.get('profitDailyPLN_6xRX570_4gb_used')))
     if cDict['roi_6xRX570_4gb_used'] < 0:
         cDict['roi_6xRX570_4gb_used'] = "Never :("
@@ -465,7 +475,7 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['rigPricePLN_12xRX6600_octo'] = final_prices.pop(0)
     cDict['hashrate_12xRX6600_octo'] = final_hashrates.pop(0)
     cDict['power_12xRX6600_octo'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_12xRX6600_octo'] = round(((profitPerMHsDaily_ETC + profitPerMHsDaily_ZIL) * PLNperUSD * cDict.get('hashrate_12xRX6600_octo')) - (cDict.get('power_12xRX6600_octo') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
+    cDict['profitDailyPLN_12xRX6600_octo'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_12xRX6600_octo')) + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_12xRX6600_octo')) + (profitPerMHsDaily_KAS * PLNperUSD * cDict.get('kas_hashrate_12xRX6600_octo')) - (cDict.get('power_12xRX6600_octo') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
     cDict['roi_12xRX6600_octo'] = int(cDict.get('rigPricePLN_12xRX6600_octo')/(cDict.get('profitDailyPLN_12xRX6600_octo')))
     if cDict['roi_12xRX6600_octo'] < 0:
         cDict['roi_12xRX6600_octo'] = "Never :("
@@ -473,7 +483,7 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['rigPricePLN_obm_10xRTX3070'] = final_prices.pop(0)
     cDict['hashrate_obm_10xRTX3070'] = final_hashrates.pop(0)
     cDict['power_obm_10xRTX3070'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_obm_10xRTX3070'] = round(((profitPerMHsDaily_ETC + profitPerMHsDaily_ZIL) * PLNperUSD * cDict.get('hashrate_obm_10xRTX3070')) - (cDict.get('power_obm_10xRTX3070') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
+    cDict['profitDailyPLN_obm_10xRTX3070'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_obm_10xRTX3070')) + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_obm_10xRTX3070')) + (profitPerMHsDaily_KAS * PLNperUSD * cDict.get('kas_hashrate_obm_10xRTX3070')) - (cDict.get('power_obm_10xRTX3070') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
     cDict['roi_obm_10xRTX3070'] = int(cDict.get('rigPricePLN_obm_10xRTX3070')/(cDict.get('profitDailyPLN_obm_10xRTX3070')))
     if cDict['roi_obm_10xRTX3070'] < 0:
         cDict['roi_obm_10xRTX3070'] = "Never :("
