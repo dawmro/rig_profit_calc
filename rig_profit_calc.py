@@ -245,8 +245,8 @@ def getHashrateFromSoup(soup, name = "default_name", vendor = "ZET"):
             for i in div_tag:
                 text = i.get_text()
 
-                if "Mining GPU ETH/ETC =" in text:
-                    text = text.split("Mining GPU ETH/ETC =")[1].strip().split("MH")[0]
+                if "Mining GPU ETC =" in text:
+                    text = text.split("Mining GPU ETC =")[1].strip().split("MH")[0]
                     hashrate = int(text)
                     
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] getHashrate for "+name+" done!")
@@ -405,6 +405,8 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
         profitPerMHsDaily_ETC = useProfitCache('162', 1, 0, 0) 
     except:
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Can't fetch profits for ETC, using: " + str(profitPerMHsDaily_ETC))
+        
+    
     '''
     try:
         profitPerMHsDaily_RVN = useProfitCache('ravencoin', 1, 0, 0)
@@ -417,109 +419,36 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['electricityPricePLN'] = cDict.get('electricityPricePLN_gr') / 100
     cDict['electricityPrice'] = cDict.get('electricityPricePLN')/PLNperUSD
 
+    names = []
+    urls = []
     
-    cDict['rigName_6xRX570_4gb_used'] = "ZET 6x RX570 4GB Used "
-    link_6xRX570_4gb_used = "https://shop.zet-tech.eu/pl/p/6x-RX-470-4GB-Koparka-kryptowalut/116"
+    
+    cDict['rigName_6xRX570_4gb_used'] = "ZET 6x RX570 4GB Used"
+    names.append(cDict['rigName_6xRX570_4gb_used'])
+    link_6xRX570_4gb_used = "https://shop.zet-tech.eu/pl/p/6x-RX-570-4GB-Koparka-kryptowalut/155"
+    urls.append(link_6xRX570_4gb_used)
     cDict['link_6xRX570_4gb_used'] = link_6xRX570_4gb_used
     
-    cDict['rigName_8xRX6600'] = "ZET 8x RX6600XT"
-    link_8xRX6600 = "https://shop.zet-tech.eu/pl/p/8x-RX-6600XT-Koparka-kryptowalut-NOWOSC/118"
-    cDict['link_8xRX6600'] = link_8xRX6600
-    
     cDict['rigName_12xRX6600_octo'] = "ZET OCTOMINER 12x RX6600XT"
+    names.append(cDict['rigName_12xRX6600_octo'])
     link_12xRX6600_octo = "https://shop.zet-tech.eu/pl/p/OCTOMINER-12x-RX6600/146"
+    urls.append(link_12xRX6600_octo)
     cDict['link_12xRX6600_octo'] = link_12xRX6600_octo
     
-    cDict['rigName_6xGTX1660TI'] = "ZET 6x GTX1660 Super"
-    link_6xGTX1660TI = "https://shop.zet-tech.eu/pl/p/6x-GTX-1660-SUPER-Koparka-kryptowalut/74"
-    cDict['link_6xGTX1660TI'] = link_6xGTX1660TI
-    
-    cDict['rigName_6xRX6700XT'] = "ZET 6x RX6700XT"
-    link_6xRX6700XT = "https://shop.zet-tech.eu/pl/p/6x-RX-6700XT-Koparka-kryptowalut-NOWOSC-/94"
-    cDict['link_6xRX6700XT'] = link_6xRX6700XT
-    
-    cDict['rigName_8xRX6700XT_octo'] = "ZET OCTOMINER 8x RX6700XT"
-    link_8xRX6700XT_octo = "https://shop.zet-tech.eu/pl/p/OCTOMINER-8x-RX-6700XT/147"
-    cDict['link_8xRX6700XT_octo'] = link_8xRX6700XT_octo
-    
-    cDict['rigName_8xRTX2060Super'] = "ZET 8x RTX2060 Super"
-    link_8xRTX2060Super = "https://shop.zet-tech.eu/pl/p/8x-RTX-2060-SUPER-Koparka-kryptowalut-NOWOSC/145"
-    cDict['link_8xRTX2060Super'] = link_8xRTX2060Super
-    
-    cDict['rigName_6xRTX3060ti'] = "ZET 6x RTX3060 TI"
-    link_6xRTX3060ti = "https://shop.zet-tech.eu/pl/p/6x-RTX-3060-Ti-Koparka-kryptowalut/119"
-    cDict['link_6xRTX3060ti'] = link_6xRTX3060ti
-    
-    cDict['rigName_3xRTX3070ti'] = "ZET 3x RTX3070 TI"
-    link_3xRTX3070ti = "https://shop.zet-tech.eu/pl/p/3x-RTX-3070-Ti-Koparka-kryptowalut/124"
-    cDict['link_3xRTX3070ti'] = link_3xRTX3070ti
-    
-    cDict['rigName_6xRTX3070ti'] = "ZET 6x RTX3070 TI"
-    link_6xRTX3070ti = "https://shop.zet-tech.eu/pl/p/6x-RTX-3070-Ti-Koparka-kryptowalut/89"
-    cDict['link_6xRTX3070ti'] = link_6xRTX3070ti
-    
-    cDict['rigName_6xRX6800'] = "ZET 6x RX6800"
-    link_6xRX6800 = "https://shop.zet-tech.eu/pl/p/6x-RX-6800-Koparka-kryptowalut-NOWOSC/140"
-    cDict['link_6xRX6800'] = link_6xRX6800
-    
-    cDict['rigName_3xRTX3090'] = "ZET 3x RTX3090"
-    link_3xRTX3090 = "https://shop.zet-tech.eu/pl/p/3x-RTX-3090-Koparka-kryptowalut/111"
-    cDict['link_3xRTX3090'] = link_3xRTX3090
-    
-    cDict['rigName_6xRTX3090'] = "ZET 6x RTX3090"
-    link_6xRTX3090 = "https://shop.zet-tech.eu/pl/p/6x-RTX-3090-Koparka-kryptowalut-/72"
-    cDict['link_6xRTX3090'] = link_6xRTX3090
-    
-    cDict['rigName_8xRTX3080_octo'] = "ZET OCTOMINER 8x RTX3080"
-    link_8xRTX3080_octo = "https://shop.zet-tech.eu/pl/p/OCTOMINER-8x-RTX-3080/148"
-    cDict['link_8xRTX3080_octo'] = link_8xRTX3080_octo
-    
-    cDict['rigName_8xRTX3090_octo'] = "ZET OCTOMINER 8x RTX3090"
-    link_8xRTX3090_octo = "https://shop.zet-tech.eu/pl/p/OCTOMINER-8x-RTX-3090/149"
-    cDict['link_8xRTX3090_octo'] = link_8xRTX3090_octo
-    
-    cDict['rigName_48xRX6700'] = "ZET 48x RX6700"
-    link_48xRX6700 = "https://shop.zet-tech.eu/pl/p/48-x-RX-6700-Koparka-kryptowalut-NAJMOCNIEJSZA/44"
-    cDict['link_48xRX6700'] = link_48xRX6700
-    
-    cDict['rigName_200xRX6700'] = "ZET Mining Farm RX6700" # 90x 6x6700
-    link_200xRX6700 = "https://shop.zet-tech.eu/pl/p/Kopalnia-kryptowalut/103"
-    cDict['link_200xRX6700'] = link_200xRX6700
-    
-    cDict['rigName_540xRTX3070'] = "ZET Mining Farm RTX3070"
-    link_540xRTX3070 = "https://shop.zet-tech.eu/pl/p/Kopalnia-kryptowalut-RTX-3070/153"
-    cDict['link_540xRTX3070'] = link_540xRTX3070
-    
     cDict['rigName_obm_10xRTX3070'] = "OBM 10x RTX3070"
+    names.append(cDict['rigName_obm_10xRTX3070'])
     link_obm_10xRTX3070 = "https://onlybestminers.com/pl_pl/produkt/gpu-obm10xrtx3070/"
+    urls.append(link_obm_10xRTX3070)
     cDict['link_obm_10xRTX3070'] = link_obm_10xRTX3070
     
-    cDict['rigName_6xRTX3070'] = "ZET 10x RTX3070"
-    link_6xRTX3070 = "https://shop.zet-tech.eu/pl/p/6x-RTX-3070-Koparka-kryptowalut/150"
-    cDict['link_6xRTX3070'] = link_6xRTX3070
-
-    
-    names = [cDict['rigName_6xRX570_4gb_used'], cDict['rigName_8xRX6600'],cDict['rigName_12xRX6600_octo'], cDict['rigName_6xGTX1660TI'],
-        cDict['rigName_6xRX6700XT'], cDict['rigName_8xRX6700XT_octo'], cDict['rigName_8xRTX2060Super'], cDict['rigName_6xRTX3060ti'],
-        cDict['rigName_3xRTX3070ti'], cDict['rigName_6xRTX3070ti'], cDict['rigName_6xRX6800'], cDict['rigName_3xRTX3090'],
-        cDict['rigName_6xRTX3090'], cDict['rigName_8xRTX3080_octo'], cDict['rigName_8xRTX3090_octo'], cDict['rigName_48xRX6700'],
-        cDict['rigName_200xRX6700'], cDict['rigName_540xRTX3070'], cDict['rigName_obm_10xRTX3070'], cDict['rigName_6xRTX3070']
-    ]
+   
     
     tableNames = []
     vendors = []
     for name in names:
         tableNames.append(str("_"+name.replace(" ", "")))
         vendors.append(name[0:3])
-        
-    
-    urls = [link_6xRX570_4gb_used, link_8xRX6600, link_12xRX6600_octo, link_6xGTX1660TI, 
-        link_6xRX6700XT, link_8xRX6700XT_octo, link_8xRTX2060Super, link_6xRTX3060ti,
-        link_3xRTX3070ti, link_6xRTX3070ti, link_6xRX6800, link_3xRTX3090,
-        link_6xRTX3090, link_8xRTX3080_octo, link_8xRTX3090_octo, link_48xRX6700,
-        link_200xRX6700, link_540xRTX3070, link_obm_10xRTX3070, link_6xRTX3070
-    ] 
-    
+          
 
     
     final_prices, final_hashrates, final_wattages = readAndUpdateCache(names, urls, tableNames, vendors)
@@ -532,14 +461,6 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     if cDict['roi_6xRX570_4gb_used'] < 0:
         cDict['roi_6xRX570_4gb_used'] = "Never :("
         
-    cDict['rigPricePLN_8xRX6600'] = final_prices.pop(0)
-    cDict['hashrate_8xRX6600'] = final_hashrates.pop(0)
-    cDict['power_8xRX6600'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_8xRX6600'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_8xRX6600')) - (cDict.get('power_8xRX6600') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_8xRX6600'] = int(cDict.get('rigPricePLN_8xRX6600')/(cDict.get('profitDailyPLN_8xRX6600')))
-    if cDict['roi_8xRX6600'] < 0:
-        cDict['roi_8xRX6600'] = "Never :("
-        
     cDict['rigPricePLN_12xRX6600_octo'] = final_prices.pop(0)
     cDict['hashrate_12xRX6600_octo'] = final_hashrates.pop(0)
     cDict['power_12xRX6600_octo'] = final_wattages.pop(0)
@@ -547,126 +468,6 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['roi_12xRX6600_octo'] = int(cDict.get('rigPricePLN_12xRX6600_octo')/(cDict.get('profitDailyPLN_12xRX6600_octo')))
     if cDict['roi_12xRX6600_octo'] < 0:
         cDict['roi_12xRX6600_octo'] = "Never :("
-    
-    cDict['rigPricePLN_6xGTX1660TI'] = final_prices.pop(0)
-    cDict['hashrate_6xGTX1660TI'] = final_hashrates.pop(0)
-    cDict['power_6xGTX1660TI'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_6xGTX1660TI'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xGTX1660TI')) - (cDict.get('power_6xGTX1660TI') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_6xGTX1660TI'] = int(cDict.get('rigPricePLN_6xGTX1660TI')/(cDict.get('profitDailyPLN_6xGTX1660TI')))
-    if cDict['roi_6xGTX1660TI'] < 0:
-        cDict['roi_6xGTX1660TI'] = "Never :("
-    
-    cDict['rigPricePLN_6xRX6700XT'] = final_prices.pop(0)
-    cDict['hashrate_6xRX6700XT'] = final_hashrates.pop(0)
-    cDict['power_6xRX6700XT'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_6xRX6700XT'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRX6700XT')) - (cDict.get('power_6xRX6700XT') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_6xRX6700XT'] = int(cDict.get('rigPricePLN_6xRX6700XT')/(cDict.get('profitDailyPLN_6xRX6700XT')))
-    if cDict['roi_6xRX6700XT'] < 0:
-        cDict['roi_6xRX6700XT'] = "Never :("
-        
-    cDict['rigPricePLN_8xRX6700XT_octo'] = final_prices.pop(0)
-    cDict['hashrate_8xRX6700XT_octo'] = final_hashrates.pop(0)
-    cDict['power_8xRX6700XT_octo'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_8xRX6700XT_octo'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_8xRX6700XT_octo')) - (cDict.get('power_8xRX6700XT_octo') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_8xRX6700XT_octo'] = int(cDict.get('rigPricePLN_8xRX6700XT_octo')/(cDict.get('profitDailyPLN_8xRX6700XT_octo')))
-    if cDict['roi_8xRX6700XT_octo'] < 0:
-        cDict['roi_8xRX6700XT_octo'] = "Never :("
-        
-    cDict['rigPricePLN_8xRTX2060Super'] = final_prices.pop(0)
-    cDict['hashrate_8xRTX2060Super'] = final_hashrates.pop(0)
-    cDict['power_8xRTX2060Super'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_8xRTX2060Super'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_8xRTX2060Super')) - (cDict.get('power_8xRTX2060Super') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_8xRTX2060Super'] = int(cDict.get('rigPricePLN_8xRTX2060Super')/(cDict.get('profitDailyPLN_8xRTX2060Super')))
-    if cDict['roi_8xRTX2060Super'] < 0:
-        cDict['roi_8xRTX2060Super'] = "Never :("
-        
-    cDict['rigPricePLN_6xRTX3060ti'] = final_prices.pop(0)
-    cDict['hashrate_6xRTX3060ti'] = final_hashrates.pop(0)
-    cDict['power_6xRTX3060ti'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_6xRTX3060ti'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRTX3060ti')) - (cDict.get('power_6xRTX3060ti') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_6xRTX3060ti'] = int(cDict.get('rigPricePLN_6xRTX3060ti')/(cDict.get('profitDailyPLN_6xRTX3060ti')))
-    if cDict['roi_6xRTX3060ti'] < 0:
-        cDict['roi_6xRTX3060ti'] = "Never :("
-        
-    cDict['rigPricePLN_3xRTX3070ti'] = final_prices.pop(0)
-    cDict['hashrate_3xRTX3070ti'] = final_hashrates.pop(0)
-    cDict['power_3xRTX3070ti'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_3xRTX3070ti'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_3xRTX3070ti')) - (cDict.get('power_3xRTX3070ti') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_3xRTX3070ti'] = int(cDict.get('rigPricePLN_3xRTX3070ti')/(cDict.get('profitDailyPLN_3xRTX3070ti')))
-    if cDict['roi_3xRTX3070ti'] < 0:
-        cDict['roi_3xRTX3070ti'] = "Never :("
-        
-    cDict['rigPricePLN_6xRTX3070ti'] = final_prices.pop(0)
-    cDict['hashrate_6xRTX3070ti'] = final_hashrates.pop(0)
-    cDict['power_6xRTX3070ti'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_6xRTX3070ti'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRTX3070ti')) - (cDict.get('power_6xRTX3070ti') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_6xRTX3070ti'] = int(cDict.get('rigPricePLN_6xRTX3070ti')/(cDict.get('profitDailyPLN_6xRTX3070ti')))
-    if cDict['roi_6xRTX3070ti'] < 0:
-        cDict['roi_6xRTX3070ti'] = "Never :("
-        
-    cDict['rigPricePLN_6xRX6800'] = final_prices.pop(0)
-    cDict['hashrate_6xRX6800'] = final_hashrates.pop(0)
-    cDict['power_6xRX6800'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_6xRX6800'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRX6800')) - (cDict.get('power_6xRX6800') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_6xRX6800'] = int(cDict.get('rigPricePLN_6xRX6800')/(cDict.get('profitDailyPLN_6xRX6800')))
-    if cDict['roi_6xRX6800'] < 0:
-        cDict['roi_6xRX6800'] = "Never :("
-        
-    cDict['rigPricePLN_3xRTX3090'] = final_prices.pop(0)
-    cDict['hashrate_3xRTX3090'] = final_hashrates.pop(0)
-    cDict['power_3xRTX3090'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_3xRTX3090'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_3xRTX3090')) - (cDict.get('power_3xRTX3090') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_3xRTX3090'] = int(cDict.get('rigPricePLN_3xRTX3090')/(cDict.get('profitDailyPLN_3xRTX3090')))
-    if cDict['roi_3xRTX3090'] < 0:
-        cDict['roi_3xRTX3090'] = "Never :("
-        
-    cDict['rigPricePLN_6xRTX3090'] = final_prices.pop(0)
-    cDict['hashrate_6xRTX3090'] = final_hashrates.pop(0)
-    cDict['power_6xRTX3090'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_6xRTX3090'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRTX3090')) - (cDict.get('power_6xRTX3090') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_6xRTX3090'] = int(cDict.get('rigPricePLN_6xRTX3090')/(cDict.get('profitDailyPLN_6xRTX3090')))
-    if cDict['roi_6xRTX3090'] < 0:
-        cDict['roi_6xRTX3090'] = "Never :("
-        
-    cDict['rigPricePLN_8xRTX3080_octo'] = final_prices.pop(0)
-    cDict['hashrate_8xRTX3080_octo'] = final_hashrates.pop(0)
-    cDict['power_8xRTX3080_octo'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_8xRTX3080_octo'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_8xRTX3080_octo')) - (cDict.get('power_8xRTX3080_octo') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_8xRTX3080_octo'] = int(cDict.get('rigPricePLN_8xRTX3080_octo')/(cDict.get('profitDailyPLN_8xRTX3080_octo')))
-    if cDict['roi_8xRTX3080_octo'] < 0:
-        cDict['roi_8xRTX3080_octo'] = "Never :("
-        
-    cDict['rigPricePLN_8xRTX3090_octo'] = final_prices.pop(0)
-    cDict['hashrate_8xRTX3090_octo'] = final_hashrates.pop(0)
-    cDict['power_8xRTX3090_octo'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_8xRTX3090_octo'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_8xRTX3090_octo')) - (cDict.get('power_8xRTX3090_octo') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_8xRTX3090_octo'] = int(cDict.get('rigPricePLN_8xRTX3090_octo')/(cDict.get('profitDailyPLN_8xRTX3090_octo')))
-    if cDict['roi_8xRTX3090_octo'] < 0:
-        cDict['roi_8xRTX3090_octo'] = "Never :("
-        
-    cDict['rigPricePLN_48xRX6700'] = final_prices.pop(0)
-    cDict['hashrate_48xRX6700'] = final_hashrates.pop(0)
-    cDict['power_48xRX6700'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_48xRX6700'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_48xRX6700')) - (cDict.get('power_48xRX6700') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_48xRX6700'] = int(cDict.get('rigPricePLN_48xRX6700')/(cDict.get('profitDailyPLN_48xRX6700')))
-    if cDict['roi_48xRX6700'] < 0:
-        cDict['roi_48xRX6700'] = "Never :("
-        
-    cDict['rigPricePLN_200xRX6700'] = final_prices.pop(0)
-    cDict['hashrate_200xRX6700'] = final_hashrates.pop(0)
-    cDict['power_200xRX6700'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_200xRX6700'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_200xRX6700')) - (cDict.get('power_200xRX6700') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_200xRX6700'] = int(cDict.get('rigPricePLN_200xRX6700')/(cDict.get('profitDailyPLN_200xRX6700')))
-    if cDict['roi_200xRX6700'] < 0:
-        cDict['roi_200xRX6700'] = "Never :("
-        
-    cDict['rigPricePLN_540xRTX3070'] = final_prices.pop(0)
-    cDict['hashrate_540xRTX3070'] = final_hashrates.pop(0)
-    cDict['power_540xRTX3070'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_540xRTX3070'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_540xRTX3070')) - (cDict.get('power_540xRTX3070') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_540xRTX3070'] = int(cDict.get('rigPricePLN_540xRTX3070')/(cDict.get('profitDailyPLN_540xRTX3070')))
-    if cDict['roi_540xRTX3070'] < 0:
-        cDict['roi_540xRTX3070'] = "Never :("
         
     cDict['rigPricePLN_obm_10xRTX3070'] = final_prices.pop(0)
     cDict['hashrate_obm_10xRTX3070'] = final_hashrates.pop(0)
@@ -675,14 +476,7 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['roi_obm_10xRTX3070'] = int(cDict.get('rigPricePLN_obm_10xRTX3070')/(cDict.get('profitDailyPLN_obm_10xRTX3070')))
     if cDict['roi_obm_10xRTX3070'] < 0:
         cDict['roi_obm_10xRTX3070'] = "Never :("
-        
-    cDict['rigPricePLN_6xRTX3070'] = final_prices.pop(0)
-    cDict['hashrate_6xRTX3070'] = final_hashrates.pop(0)
-    cDict['power_6xRTX3070'] = final_wattages.pop(0)
-    cDict['profitDailyPLN_6xRTX3070'] = round((profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRTX3070')) - (cDict.get('power_6xRTX3070') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_6xRTX3070'] = int(cDict.get('rigPricePLN_6xRTX3070')/(cDict.get('profitDailyPLN_6xRTX3070')))
-    if cDict['roi_6xRTX3070'] < 0:
-        cDict['roi_6xRTX3070'] = "Never :("
+    
     
     return cDict    
     
