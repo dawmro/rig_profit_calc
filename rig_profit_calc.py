@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from flask_caching import Cache
 
 import requests
 import aiohttp
@@ -8,16 +9,35 @@ import os
 import sqlite3
 import json
 import ast
+import pathlib
+import configparser
 
 from bs4 import BeautifulSoup
 from datetime import datetime
+
 
 
 shop_caching_time = 60 * 30 # 30 minutes
 profit_caching_time = 60 * 60 # 60 minutes
 usdpln_caching_time = 60 * 60 * 6 # 6 hours
 
+
+config_path = pathlib.Path(__file__).parent.absolute() / "config.ini"
+config = configparser.ConfigParser()
+config.read(config_path)
+
+HASHRATE_NO_API_KEY = config["SECRETS"]["HASHRATE_NO_API_KEY"]
+
+
 app = Flask(__name__)
+
+cache = Cache(app, config={
+    'CACHE_TYPE': 'filesystem',
+    'CACHE_DIR': 'db/cache-dir', 
+    'CACHE_DEFAULT_TIMEOUT': 86400, # 1 day
+    'CACHE_THRESHOLD': 86400 # 1 day
+})
+cache.init_app(app)
 
 
 def getUsdPln():
@@ -77,6 +97,14 @@ def useUsdPlnCache():
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Using cached values for usdpln")
         
     return usdpln  
+  
+  
+@cache.cached(timeout=86400, key_prefix='gpu_estimates')
+def getGPUEstimates(electricityPrice=0.0):
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting API for GPU Estimates...")
+    response = requests.get("https://api.hashrate.no/v1/gpuEstimates?apiKey="+str(HASHRATE_NO_API_KEY)+"&powerCost="+str(electricityPrice), timeout=2)
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" API for GPU Estimates done!")
+    return response.text
   
   
 def getProfitDaily(coin ='162', hashrate=1, power=0, electricityPrice=0.0):
@@ -166,7 +194,6 @@ async def main(urls, names):
    
    
 def makeSoup(results, names):
-  
     jars_of_soup = []
     i = 0
     for html in results:
@@ -395,6 +422,7 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     profitPerMHsDaily_ZIL = 0.00070
     profitPerMHsDaily_KAS = 0.00062
     #profitPerMHsDaily_RVN = 0.05123
+    
 
 
     try:
@@ -427,7 +455,13 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['electricityPricePLN_gr'] = float(electricityPricePLN_gr)
     cDict['electricityPricePLN'] = cDict.get('electricityPricePLN_gr') / 100
     cDict['electricityPrice'] = cDict.get('electricityPricePLN')/PLNperUSD
-
+    
+    try:
+        GPUEstimates = getGPUEstimates()
+    except:
+        GPUEstimates = None
+    #print(GPUEstimates)
+    
     names = []
     urls = []
     
@@ -468,6 +502,14 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['rigPricePLN_6xRX570_4gb_used'] = final_prices.pop(0)
     cDict['hashrate_6xRX570_4gb_used'] = final_hashrates.pop(0)
     cDict['power_6xRX570_4gb_used'] = int(final_wattages.pop(0) * 1.25)
+    cDict['best_coin_6xRX570_4gb_used'] = str(json.loads(GPUEstimates)['570']['profit24']['coin'])
+    cDict['number_of_cards_6xRX570_4gb_used'] = 6
+    cDict['best_profitDailyPLN_6xRX570_4gb_used'] = round( 
+        json.loads(GPUEstimates)['570']['profit24']['profitUSD24'] * PLNperUSD * cDict.get('number_of_cards_6xRX570_4gb_used')
+        - (cDict.get('power_6xRX570_4gb_used') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
+    cDict['best_roi_6xRX570_4gb_used'] = int(cDict.get('rigPricePLN_6xRX570_4gb_used')/(cDict.get('best_profitDailyPLN_6xRX570_4gb_used')))
+    if cDict['best_roi_6xRX570_4gb_used'] < 0:
+        cDict['best_roi_6xRX570_4gb_used'] = "Never :("
     cDict['profitDailyPLN_6xRX570_4gb_used'] = round(
         (profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) 
         + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) 
@@ -480,6 +522,14 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['rigPricePLN_12xRX6600_octo'] = final_prices.pop(0)
     cDict['hashrate_12xRX6600_octo'] = final_hashrates.pop(0)
     cDict['power_12xRX6600_octo'] = int(final_wattages.pop(0) * 1.25)
+    cDict['best_coin_12xRX6600_octo'] = str(json.loads(GPUEstimates)['6600']['profit24']['coin'])
+    cDict['number_of_cards_12xRX6600_octo'] = 12
+    cDict['best_profitDailyPLN_12xRX6600_octo'] = round( 
+        json.loads(GPUEstimates)['6600']['profit24']['profitUSD24'] * PLNperUSD * cDict.get('number_of_cards_12xRX6600_octo')
+        - (cDict.get('power_12xRX6600_octo') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
+    cDict['best_roi_12xRX6600_octo'] = int(cDict.get('rigPricePLN_12xRX6600_octo')/(cDict.get('best_profitDailyPLN_12xRX6600_octo')))
+    if cDict['best_roi_12xRX6600_octo'] < 0:
+        cDict['best_roi_12xRX6600_octo'] = "Never :("
     cDict['profitDailyPLN_12xRX6600_octo'] = round(
         (profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_12xRX6600_octo')) 
         + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_12xRX6600_octo')) 
@@ -492,6 +542,14 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['rigPricePLN_obm_10xRTX3070'] = final_prices.pop(0)
     cDict['hashrate_obm_10xRTX3070'] = final_hashrates.pop(0)
     cDict['power_obm_10xRTX3070'] = int(final_wattages.pop(0) * 1.25)
+    cDict['best_coin_obm_10xRTX3070'] = str(json.loads(GPUEstimates)['3070']['profit24']['coin'])
+    cDict['number_of_cards_obm_10xRTX3070'] = 10
+    cDict['best_profitDailyPLN_obm_10xRTX3070'] = round( 
+        json.loads(GPUEstimates)['3070']['profit24']['profitUSD24'] * PLNperUSD * cDict.get('number_of_cards_obm_10xRTX3070')
+        - (cDict.get('power_obm_10xRTX3070') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
+    cDict['best_roi_obm_10xRTX3070'] = int(cDict.get('rigPricePLN_obm_10xRTX3070')/(cDict.get('best_profitDailyPLN_obm_10xRTX3070')))
+    if cDict['best_roi_obm_10xRTX3070'] < 0:
+        cDict['best_roi_obm_10xRTX3070'] = "Never :("
     cDict['profitDailyPLN_obm_10xRTX3070'] = round(
         (profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_obm_10xRTX3070')) 
         + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_obm_10xRTX3070')) 
