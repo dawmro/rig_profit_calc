@@ -106,7 +106,13 @@ def getGPUEstimates(electricityPrice=0.0):
     print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" API for GPU Estimates done!")
     return response.text
     
-
+    
+@cache.cached(timeout=86400, key_prefix='asic_estimates')
+def getASICEstimates(electricityPrice=0.0):
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting API for ASIC Estimates...")
+    response = requests.get("https://api.hashrate.no/v1/asicEstimates?apiKey="+str(HASHRATE_NO_API_KEY)+"&powerCost="+str(electricityPrice), timeout=2)
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" API for ASIC Estimates done!")
+    return response.text
         
 '''  
 def getProfitDaily(coin ='162', hashrate=1, power=0, electricityPrice=0.0):
@@ -462,7 +468,11 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
         GPUEstimates = None
     #print(GPUEstimates)    
     
-
+    try:
+        ASICEstimates = getASICEstimates()
+    except:
+        ASICEstimates = None
+    #print(ASICEstimates)
     
     names = []
     urls = []
@@ -488,6 +498,12 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     urls.append(link_obm_10xRTX3070)
     cDict['link_obm_10xRTX3070'] = link_obm_10xRTX3070
     cDict['kas_hashrate_obm_10xRTX3070'] = 3200
+    
+    cDict['rigName_JASMINER_X16_Q'] = "ZET JASMINER X16-Q"
+    names.append(cDict['rigName_JASMINER_X16_Q'])
+    link_JASMINER_X16_Q = "https://shop.zet-tech.eu/pl/p/JASMINER-X16-Q-Koparka-kryptowalut/287"
+    urls.append(link_JASMINER_X16_Q)
+    cDict['link_JASMINER_X16_Q'] = link_JASMINER_X16_Q
 
     
    
@@ -539,7 +555,18 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['best_roi_obm_10xRTX3070'] = int(cDict.get('rigPricePLN_obm_10xRTX3070')/(cDict.get('best_profitDailyPLN_obm_10xRTX3070')))
     if cDict['best_roi_obm_10xRTX3070'] < 0:
         cDict['best_roi_obm_10xRTX3070'] = "Never :("
-
+    
+    
+    cDict['rigPricePLN_JASMINER_X16_Q'] = final_prices.pop(0)
+    cDict['hashrate_JASMINER_X16_Q'] = final_hashrates.pop(0)
+    cDict['power_JASMINER_X16_Q'] = int(final_wattages.pop(0))
+    cDict['best_coin_JASMINER_X16_Q'] = str(json.loads(ASICEstimates)['x16q']['profit24']['coin'])
+    cDict['best_profitDailyPLN_JASMINER_X16_Q'] = round( 
+        json.loads(ASICEstimates)['x16q']['profit24']['profitUSD24'] * PLNperUSD 
+        - (cDict.get('power_JASMINER_X16_Q') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
+    cDict['best_roi_JASMINER_X16_Q'] = int(cDict.get('rigPricePLN_JASMINER_X16_Q')/(cDict.get('best_profitDailyPLN_JASMINER_X16_Q')))
+    if cDict['best_roi_JASMINER_X16_Q'] < 0:
+        cDict['best_roi_JASMINER_X16_Q'] = "Never :("
     
     return cDict    
     
