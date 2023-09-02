@@ -105,8 +105,10 @@ def getGPUEstimates(electricityPrice=0.0):
     response = requests.get("https://api.hashrate.no/v1/gpuEstimates?apiKey="+str(HASHRATE_NO_API_KEY)+"&powerCost="+str(electricityPrice), timeout=2)
     print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" API for GPU Estimates done!")
     return response.text
-  
-  
+    
+
+        
+'''  
 def getProfitDaily(coin ='162', hashrate=1, power=0, electricityPrice=0.0):
     print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting API for "+coin+" ...")
     hashrate = hashrate*10**3 # 1 Gh/s for ETC 
@@ -166,7 +168,7 @@ def useProfitCache(coin, hashrate, power, electricityPrice):
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Using cached values for "+str(coin))
         
     return profitDaily
-    
+'''    
  
 
 async def get_page(session, url, name): 
@@ -217,7 +219,7 @@ def getPriceFromSoup(soup, name = "default_name", vendor = "ZET"):
             price = soup.find(class_ = 'price').select_one("bdi").text
             price_int = int(price.split(",")[0].replace(" ", ""))
             
-        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] getPrice for "+name+" done!")
+        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] getPrice for "+name+" done: "+str(price_int))
         return price_int
         
     except:
@@ -275,8 +277,8 @@ def getHashrateFromSoup(soup, name = "default_name", vendor = "ZET"):
                 if "Mining GPU ETC =" in text:
                     text = text.split("Mining GPU ETC =")[1].strip().split("MH")[0]
                     hashrate = int(text)
-                    
-        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] getHashrate for "+name+" done!")
+                        
+        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] getHashrate for "+name+" done: "+str(hashrate))
         return hashrate
         
     except:
@@ -296,8 +298,7 @@ def getWattageFromSoup(soup, name = "default_name", vendor = "ZET"):
                 
                 if "Pobór energii:" in text:
 
-                    text = text.split("Pobór energii:")[1].strip()
-                        
+                    text = text.split("Pobór energii:")[1].strip()  
                     text = text.split("W")[0].strip()
                     if "-" in text:
                         text = text.split("-")
@@ -314,7 +315,7 @@ def getWattageFromSoup(soup, name = "default_name", vendor = "ZET"):
                     text = text.split("Realny pobór pradu:")[1].strip().split("W")[0]
                     wattage = int(text)
                     
-        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] getWattage for "+name+" done!")
+        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] getWattage for "+name+" done: "+str(wattage))
         return wattage
         
     except:
@@ -331,7 +332,7 @@ def createDirIfNotExist(path):
          
  
 
-def readAndUpdateCache(names, urls, tableNames, vendors):
+def readAndUpdateShopCache(names, urls, tableNames, vendors):
     db_path = "db/cacheFromShop.db"
     path = 'db'
     createDirIfNotExist(path)
@@ -363,7 +364,7 @@ def readAndUpdateCache(names, urls, tableNames, vendors):
     
         c.close()
         conn.close()
-        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Got data from cache") 
+        print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Got data from shop cache") 
 
     # update data in db
         
@@ -404,7 +405,7 @@ def readAndUpdateCache(names, urls, tableNames, vendors):
             c.close()
             conn.close()
             
-            print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Updating cache for "+str(names[i]))
+            print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Updating shop cache for "+str(names[i]))
             i=i+1
         
     
@@ -418,11 +419,12 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
 
     # defaults
     PLNperUSD = 4.5
+    '''
     profitPerMHsDaily_ETC = 0.00279
     profitPerMHsDaily_ZIL = 0.00070
     profitPerMHsDaily_KAS = 0.00062
-    #profitPerMHsDaily_RVN = 0.05123
-    
+    profitPerMHsDaily_RVN = 0.05123
+    '''
 
 
     try:
@@ -430,7 +432,7 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     except:
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Can't fetch USDPLN, using: " + str(PLNperUSD))
 
-
+    '''
     try:
         # ethereumclassic
         profitPerMHsDaily_ETC = useProfitCache('162', 1, 0, 0) 
@@ -443,8 +445,6 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     except:
         print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Can't fetch profits for KAS, using: " + str(profitPerMHsDaily_KAS))
         
-    
-    '''
     try:
         profitPerMHsDaily_RVN = useProfitCache('ravencoin', 1, 0, 0)
     except:
@@ -460,7 +460,9 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
         GPUEstimates = getGPUEstimates()
     except:
         GPUEstimates = None
-    #print(GPUEstimates)
+    #print(GPUEstimates)    
+    
+
     
     names = []
     urls = []
@@ -486,22 +488,23 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     urls.append(link_obm_10xRTX3070)
     cDict['link_obm_10xRTX3070'] = link_obm_10xRTX3070
     cDict['kas_hashrate_obm_10xRTX3070'] = 3200
+
     
    
     
     tableNames = []
     vendors = []
     for name in names:
-        tableNames.append(str("_"+name.replace(" ", "")))
+        tableNames.append(str("_"+name.replace(" ", "").replace("-", "_")))
         vendors.append(name[0:3])
           
 
     
-    final_prices, final_hashrates, final_wattages = readAndUpdateCache(names, urls, tableNames, vendors)
+    final_prices, final_hashrates, final_wattages = readAndUpdateShopCache(names, urls, tableNames, vendors)
 
     cDict['rigPricePLN_6xRX570_4gb_used'] = final_prices.pop(0)
     cDict['hashrate_6xRX570_4gb_used'] = final_hashrates.pop(0)
-    cDict['power_6xRX570_4gb_used'] = int(final_wattages.pop(0) * 1.25)
+    cDict['power_6xRX570_4gb_used'] = int(final_wattages.pop(0))
     cDict['best_coin_6xRX570_4gb_used'] = str(json.loads(GPUEstimates)['570']['profit24']['coin'])
     cDict['number_of_cards_6xRX570_4gb_used'] = 6
     cDict['best_profitDailyPLN_6xRX570_4gb_used'] = round( 
@@ -510,18 +513,11 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['best_roi_6xRX570_4gb_used'] = int(cDict.get('rigPricePLN_6xRX570_4gb_used')/(cDict.get('best_profitDailyPLN_6xRX570_4gb_used')))
     if cDict['best_roi_6xRX570_4gb_used'] < 0:
         cDict['best_roi_6xRX570_4gb_used'] = "Never :("
-    cDict['profitDailyPLN_6xRX570_4gb_used'] = round(
-        (profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) 
-        + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_6xRX570_4gb_used')) 
-        + (profitPerMHsDaily_KAS * PLNperUSD * cDict.get('kas_hashrate_6xRX570_4gb_used')) 
-        - (cDict.get('power_6xRX570_4gb_used') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_6xRX570_4gb_used'] = int(cDict.get('rigPricePLN_6xRX570_4gb_used')/(cDict.get('profitDailyPLN_6xRX570_4gb_used')))
-    if cDict['roi_6xRX570_4gb_used'] < 0:
-        cDict['roi_6xRX570_4gb_used'] = "Never :("
+    
         
     cDict['rigPricePLN_12xRX6600_octo'] = final_prices.pop(0)
     cDict['hashrate_12xRX6600_octo'] = final_hashrates.pop(0)
-    cDict['power_12xRX6600_octo'] = int(final_wattages.pop(0) * 1.25)
+    cDict['power_12xRX6600_octo'] = int(final_wattages.pop(0))
     cDict['best_coin_12xRX6600_octo'] = str(json.loads(GPUEstimates)['6600']['profit24']['coin'])
     cDict['number_of_cards_12xRX6600_octo'] = 12
     cDict['best_profitDailyPLN_12xRX6600_octo'] = round( 
@@ -530,18 +526,11 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['best_roi_12xRX6600_octo'] = int(cDict.get('rigPricePLN_12xRX6600_octo')/(cDict.get('best_profitDailyPLN_12xRX6600_octo')))
     if cDict['best_roi_12xRX6600_octo'] < 0:
         cDict['best_roi_12xRX6600_octo'] = "Never :("
-    cDict['profitDailyPLN_12xRX6600_octo'] = round(
-        (profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_12xRX6600_octo')) 
-        + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_12xRX6600_octo')) 
-        + (profitPerMHsDaily_KAS * PLNperUSD * cDict.get('kas_hashrate_12xRX6600_octo')) 
-        - (cDict.get('power_12xRX6600_octo') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_12xRX6600_octo'] = int(cDict.get('rigPricePLN_12xRX6600_octo')/(cDict.get('profitDailyPLN_12xRX6600_octo')))
-    if cDict['roi_12xRX6600_octo'] < 0:
-        cDict['roi_12xRX6600_octo'] = "Never :("
+    
         
     cDict['rigPricePLN_obm_10xRTX3070'] = final_prices.pop(0)
     cDict['hashrate_obm_10xRTX3070'] = final_hashrates.pop(0)
-    cDict['power_obm_10xRTX3070'] = int(final_wattages.pop(0) * 1.25)
+    cDict['power_obm_10xRTX3070'] = int(final_wattages.pop(0))
     cDict['best_coin_obm_10xRTX3070'] = str(json.loads(GPUEstimates)['3070']['profit24']['coin'])
     cDict['number_of_cards_obm_10xRTX3070'] = 10
     cDict['best_profitDailyPLN_obm_10xRTX3070'] = round( 
@@ -550,15 +539,7 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['best_roi_obm_10xRTX3070'] = int(cDict.get('rigPricePLN_obm_10xRTX3070')/(cDict.get('best_profitDailyPLN_obm_10xRTX3070')))
     if cDict['best_roi_obm_10xRTX3070'] < 0:
         cDict['best_roi_obm_10xRTX3070'] = "Never :("
-    cDict['profitDailyPLN_obm_10xRTX3070'] = round(
-        (profitPerMHsDaily_ETC * PLNperUSD * cDict.get('hashrate_obm_10xRTX3070')) 
-        + (profitPerMHsDaily_ZIL * PLNperUSD * cDict.get('hashrate_obm_10xRTX3070')) 
-        + (profitPerMHsDaily_KAS * PLNperUSD * cDict.get('kas_hashrate_obm_10xRTX3070'))
-        - (cDict.get('power_obm_10xRTX3070') *24 / 1000 * cDict.get('electricityPricePLN')), 2)
-    cDict['roi_obm_10xRTX3070'] = int(cDict.get('rigPricePLN_obm_10xRTX3070')/(cDict.get('profitDailyPLN_obm_10xRTX3070')))
-    if cDict['roi_obm_10xRTX3070'] < 0:
-        cDict['roi_obm_10xRTX3070'] = "Never :("
-    
+
     
     return cDict    
     
