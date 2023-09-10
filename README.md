@@ -17,6 +17,9 @@ env/Scripts/activate
 pip install -r .\requirements.txt
 ```
 
+4. Get your API key from [hashrate.no](https://hashrate.no/account) and place it into config.ini file
+
+
 ## Usage:
 ``` sh
 python -m flask --app rig_profit_calc run
