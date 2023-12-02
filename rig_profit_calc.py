@@ -113,6 +113,14 @@ def getASICEstimates(electricityPrice=0.0):
     response = requests.get("https://api.hashrate.no/v1/asicEstimates?apiKey="+str(HASHRATE_NO_API_KEY)+"&powerCost="+str(electricityPrice), timeout=2)
     print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" API for ASIC Estimates done!")
     return response.text
+    
+    
+@cache.cached(timeout=86400, key_prefix='cpu_estimates')
+def getCPUEstimates(electricityPrice=0.0):
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" UTC] Starting API for CPU Estimates...")
+    response = requests.get("https://api.hashrate.no/v1/cpuEstimates?apiKey="+str(HASHRATE_NO_API_KEY)+"&powerCost="+str(electricityPrice), timeout=2)
+    print("["+datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')+" API for CPU Estimates done!")
+    return response.text
         
 '''  
 def getProfitDaily(coin ='162', hashrate=1, power=0, electricityPrice=0.0):
@@ -474,6 +482,12 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
         ASICEstimates = None
     #print(ASICEstimates)
     
+    try:
+        CPUEstimates = getCPUEstimates()
+    except:
+        CPUEstimates = None
+    print(CPUEstimates)
+    
     names = []
     urls = []
     
@@ -567,6 +581,22 @@ def doCalculationsForElectricityPrice(electricityPricePLN_gr):
     cDict['best_roi_JASMINER_X16_Q'] = int(cDict.get('rigPricePLN_JASMINER_X16_Q')/(cDict.get('best_profitDailyPLN_JASMINER_X16_Q')))
     if cDict['best_roi_JASMINER_X16_Q'] < 0:
         cDict['best_roi_JASMINER_X16_Q'] = "Never :("
+        
+    cDict['rigName_ryzen_3600'] = "Ryzen 5 3600"  
+    cDict['best_coin_ryzen_3600'] = str(json.loads(CPUEstimates)['3600']['profit24']['coin'])
+    cDict['power_ryzen_3600'] = 65 
+    cDict['best_profitDailyPLN_ryzen_3600'] = round( 
+        json.loads(CPUEstimates)['3600']['profit24']['profitUSD24'] * PLNperUSD
+        - (cDict.get('power_ryzen_3600') *24 / 1000 * cDict.get('electricityPricePLN')), 2)   
+        
+    cDict['rigName_ryzen_3900'] = "Ryzen 9 3900"     
+    cDict['best_coin_ryzen_3900'] = str(json.loads(CPUEstimates)['3600']['profit24']['coin'])
+    cDict['power_ryzen_3900'] = 110 
+    cDict['best_profitDailyPLN_ryzen_3900'] = round( 
+        json.loads(CPUEstimates)['3900x']['profit24']['profitUSD24'] * PLNperUSD
+        - (cDict.get('power_ryzen_3900') *24 / 1000 * cDict.get('electricityPricePLN')), 2) 
+        
+    
     
     return cDict    
     
